@@ -1,0 +1,3 @@
+vue create gift-management
+cd gift-management
+npm install @capacitor/core @capacitor/android @ionic/vue @ionic/vue-router element-plus xlsx sqlite3 
