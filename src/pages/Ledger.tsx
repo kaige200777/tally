@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/appStore';
-import { ArrowLeft, Plus, Trash2, Edit2, Check, X, ChevronRight, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Check, X, ChevronRight, BarChart3, Download } from 'lucide-react';
 import type { Ledger } from '@/types';
 import type { Record as RecordType } from '@/types';
+import { normalizeDate } from '@/lib/utils';
+import { exportToExcelToAppDir } from '@/utils/excel';
 
 export default function LedgerPage() {
   const navigate = useNavigate();
@@ -63,6 +65,21 @@ export default function LedgerPage() {
   const handleDeleteLedger = async (id: string) => {
     if (confirm('确定要删除这个账本吗？')) {
       await deleteLedger(id);
+    }
+  };
+
+  const handleExportLedger = async (ledger: Ledger) => {
+    const records = await queryRecords({ ledgerId: ledger.id });
+    if (records.length === 0) {
+      alert('该账本暂无记录可导出');
+      return;
+    }
+    try {
+      await exportToExcelToAppDir(records, ledgers);
+      alert(`账本「${ledger.name}」的 ${records.length} 条记录已导出`);
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败，请重试');
     }
   };
 
@@ -130,6 +147,12 @@ export default function LedgerPage() {
                           <Edit2 size={16} />
                         </button>
                         <button
+                          onClick={(e) => { e.stopPropagation(); handleExportLedger(ledger); }}
+                          className="p-1.5 text-green-600 hover:bg-green-100 rounded"
+                        >
+                          <Download size={16} />
+                        </button>
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteLedger(ledger.id); }}
                           className="p-1.5 text-red-600 hover:bg-red-100 rounded"
                         >
@@ -177,6 +200,12 @@ export default function LedgerPage() {
                           className="p-1.5 text-blue-600 hover:bg-blue-100 rounded"
                         >
                           <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleExportLedger(ledger); }}
+                          className="p-1.5 text-green-600 hover:bg-green-100 rounded"
+                        >
+                          <Download size={16} />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteLedger(ledger.id); }}
@@ -265,7 +294,7 @@ export default function LedgerPage() {
                           <td className={`px-3 py-2 text-sm font-medium text-right ${
                             selectedLedger.type === 'send' ? 'text-red-600' : 'text-green-600'
                           }`}>¥{record.amount}</td>
-                          <td className="px-3 py-2 text-sm text-gray-600 text-right">{record.date}</td>
+                          <td className="px-3 py-2 text-sm text-gray-600 text-right">{normalizeDate(record.date)}</td>
                           <td className="px-3 py-2 text-sm text-gray-600">{record.occasion}</td>
                         </tr>
                       ))

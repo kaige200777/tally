@@ -104,7 +104,15 @@ export default function Home() {
               <span className="text-green-500">5.</span>
               <span>支持Excel格式的数据导入导出</span>
             </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-500">6.</span>
+              <span>向作者捐赠</span>
+            </li>
           </ul>
+          <div className="mt-4 flex flex-col items-center">
+            <img src="/3.png" alt="捐赠二维码" className="w-48 h-48 object-contain rounded-lg" />
+            <p className="text-xs text-gray-400 mt-2">扫码捐赠，支持作者持续开发</p>
+          </div>
         </div>
       </main>
 

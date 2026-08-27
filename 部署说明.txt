@@ -2,3 +2,4 @@ windows下部署：
 npm run build
 cd dist
 npm run preview 端口5173
+手机（andriod/harmonyOS）部署下载apk文件安装 

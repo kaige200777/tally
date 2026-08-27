@@ -9,6 +9,8 @@ flowchart LR
 
 ## 2. Technology Description
 
+1
+
 * Frontend: React\@18 + tailwindcss\@3 + vite
 
 * Initialization Tool: vite-init

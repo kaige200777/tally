@@ -176,27 +176,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   queryRecords: async (params) => {
     const records = get().records.length > 0 ? get().records : await db.getAllRecords();
     
-    const formatDateForQuery = (dateStr: string): string => {
-      if (!dateStr) return '';
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        return `${parts[0]}/${parts[1]}/${parts[2]}`;
-      }
-      return dateStr;
-    };
-    
-    const formattedStartDate = formatDateForQuery(params.startDate || '');
-    const formattedEndDate = formatDateForQuery(params.endDate || '');
-    
     return records.filter(record => {
       if (params.ledgerId && record.ledgerId !== params.ledgerId) return false;
       if (params.person && !record.person.includes(params.person)) return false;
-      if (formattedStartDate && formattedEndDate) {
-        if (record.date < formattedStartDate || record.date > formattedEndDate) return false;
-      } else if (formattedStartDate) {
-        if (record.date !== formattedStartDate) return false;
-      } else if (formattedEndDate) {
-        if (record.date !== formattedEndDate) return false;
+      if (params.startDate && params.endDate) {
+        if (record.date < params.startDate || record.date > params.endDate) return false;
+      } else if (params.startDate) {
+        if (record.date < params.startDate) return false;
+      } else if (params.endDate) {
+        if (record.date > params.endDate) return false;
       }
       if (params.occasion && !record.occasion.includes(params.occasion)) return false;
       return true;

@@ -5,10 +5,11 @@ import { OCCASIONS } from '@/types';
 import type { Record as RecordType, Ledger } from '@/types';
 import { ArrowLeft, Search, Edit2, Trash2, ArrowUpDown, Trash, Folder, Download } from 'lucide-react';
 import { exportToExcelToAppDir } from '@/utils/excel';
+import { normalizeDate } from '@/lib/utils';
 
 export default function Query() {
   const navigate = useNavigate();
-  const { queryRecords, updateRecord, deleteRecord, ledgers } = useAppStore();
+  const { queryRecords, updateRecord, deleteRecord, ledgers, records } = useAppStore();
   const [isExporting, setIsExporting] = useState(false);
 
   const [filteredRecords, setFilteredRecords] = useState<RecordType[]>([]);
@@ -58,14 +59,19 @@ export default function Query() {
   const refreshRecords = useCallback(async () => {
     try {
       const results = await queryRecords(filters);
-      setFilteredRecords(sortRecords(results));
+      const hasActiveFilters = filters.person || filters.startDate || filters.endDate || filters.occasion || filters.ledgerId;
+      const sorted = sortRecords(hasActiveFilters ? results : results.slice(0, 10));
+      setFilteredRecords(sorted);
     } catch (err) {
       console.error('加载记录失败:', err);
     }
   }, [queryRecords, sortRecords, filters]);
 
   useEffect(() => {
-    setFilteredRecords([]);
+    const latestRecords = [...records]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 10);
+    setFilteredRecords(latestRecords);
   }, []);
 
   const handleSort = (field: keyof RecordType) => {
@@ -79,7 +85,9 @@ export default function Query() {
 
   const handleSearch = async () => {
     const results = await queryRecords(filters);
-    setFilteredRecords(sortRecords(results));
+    const hasActiveFilters = filters.person || filters.startDate || filters.endDate || filters.occasion || filters.ledgerId;
+    const toDisplay = hasActiveFilters ? results : results.slice(0, 10);
+    setFilteredRecords(sortRecords(toDisplay));
     setSelectedIds(new Set());
   };
 
@@ -114,11 +122,14 @@ export default function Query() {
       ledgerId: ''
     });
     setSelectedIds(new Set());
-    setFilteredRecords([]);
+    const latestRecords = [...records]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 10);
+    setFilteredRecords(latestRecords);
   };
 
   const handleEdit = (record: RecordType) => {
-    setEditingRecord({ ...record });
+    setEditingRecord({ ...record, date: normalizeDate(record.date) });
   };
 
   const handleSaveEdit = async () => {
@@ -351,7 +362,7 @@ export default function Query() {
                       </td>
                       <td className="px-3 py-2 text-sm text-gray-800 whitespace-nowrap">{record.person}</td>
                       <td className="px-3 py-2 text-sm font-medium whitespace-nowrap">¥{record.amount}</td>
-                      <td className="px-3 py-2 text-sm text-gray-600 whitespace-nowrap">{record.date}</td>
+                      <td className="px-3 py-2 text-sm text-gray-600 whitespace-nowrap">{normalizeDate(record.date)}</td>
                       <td className="px-3 py-2 text-sm text-gray-600 whitespace-nowrap">{record.occasion}</td>
                       <td className="px-3 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1">

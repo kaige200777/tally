@@ -60,32 +60,32 @@ const formatDateToYYYYMMDD = (dateValue: unknown): string => {
   
   if (!dateStr) {
     const now = new Date();
-    return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }
   
   const match = dateStr.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
   if (match) {
-    return `${match[1]}/${String(match[2]).padStart(2, '0')}/${String(match[3]).padStart(2, '0')}`;
+    return `${match[1]}-${String(match[2]).padStart(2, '0')}-${String(match[3]).padStart(2, '0')}`;
   }
   
   const numValue = parseFloat(dateStr);
   if (!isNaN(numValue) && numValue > 0 && !dateStr.includes('-') && !dateStr.includes('/') && !dateStr.includes('.')) {
     const excelEpoch = new Date(1899, 11, 30);
     const date = new Date(excelEpoch.getTime() + numValue * 24 * 60 * 60 * 1000);
-    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
   
   try {
     const date = new Date(dateStr);
     if (!isNaN(date.getTime())) {
-      return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
   } catch (e) {
     console.error('日期解析失败:', dateStr);
   }
   
   const now = new Date();
-  return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 };
 
 export const importFromExcel = (file: File, ledger: Ledger): Promise<Record[]> => {

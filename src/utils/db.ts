@@ -1,5 +1,18 @@
 import type { Record, Ledger, Settings } from '../types';
 
+const normalizeDate = (dateStr: string): string => {
+  if (!dateStr) return dateStr;
+  const match = String(dateStr).match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
+  if (match) {
+    return `${match[1]}-${String(match[2]).padStart(2, '0')}-${String(match[3]).padStart(2, '0')}`;
+  }
+  const date = new Date(dateStr);
+  if (!isNaN(date.getTime())) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+  return dateStr;
+};
+
 const DB_NAME = 'RenQingDB';
 const DB_VERSION = 1;
 
@@ -48,10 +61,11 @@ export const initDB = (): Promise<IDBDatabase> => {
 
 export const addRecord = async (record: Record): Promise<void> => {
   const database = await initDB();
+  const normalizedRecord = { ...record, date: normalizeDate(record.date) };
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(['records'], 'readwrite');
     const store = transaction.objectStore('records');
-    const request = store.put(record);
+    const request = store.put(normalizedRecord);
 
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
@@ -171,7 +185,9 @@ export const importDatabase = async (data: string): Promise<void> => {
     
     const recordStore = transaction.objectStore('records');
     recordStore.clear();
-    parsed.records?.forEach((record: Record) => recordStore.put(record));
+    parsed.records?.forEach((record: Record) => {
+      recordStore.put({ ...record, date: normalizeDate(record.date) });
+    });
 
     const ledgerStore = transaction.objectStore('ledgers');
     ledgerStore.clear();
